@@ -13,6 +13,7 @@ filename = sys.argv[1]
 # If logs, append logarithmic scale of each feature to feature list
 squares = ("--squares" in sys.argv)
 cubes   = ("--cubes" in sys.argv)
+sqrts   = ("--sqrts" in sys.argv)
 
 # The higher, the better
 
@@ -58,6 +59,9 @@ def linreg(expected, features):
     if (cubes):
         for feat in features:
             x.append([(float(n)**3) for n in list(data[feat][1:])])
+    if (sqrts):
+        for feat in features:
+            x.append([(float(n)**-2) for n in list(data[feat][1:])])
 
     x.append([1]*len(x[0]))
 
@@ -125,6 +129,15 @@ while True:
         feats.append(_gf**2)
         feats.append(num_chars**2)
         feats.append(num_words**2)
+    if (cubes):
+        feats.append(_gf**3)
+        feats.append(num_chars**3)
+        feats.append(num_words**3)
+    if (sqrts):
+        feats.append(_gf**-2)
+        feats.append(num_chars**-2)
+        feats.append(num_words**-2)
+
     feats.append(1)
 
     test = np.array(feats)
