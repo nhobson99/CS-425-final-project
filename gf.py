@@ -4,7 +4,7 @@ def gunning_fog(line):
     words = "".join(line.strip().split("/")).split()
     num_words = len(words)
     num_sent = len(line.split('.'))
- 
+
     long_words = 0
     for word in words:
         letters = regex.compile('[a-zA-Z]')
