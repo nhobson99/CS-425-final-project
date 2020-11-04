@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import sys
 import gf
+import math
 
 if (len(sys.argv) == 1):
     print("Usage: python3 linreg3.py input_file [--squares --cubes]")
@@ -14,6 +15,7 @@ filename = sys.argv[1]
 squares = ("--squares" in sys.argv)
 cubes   = ("--cubes" in sys.argv)
 sqrts   = ("--sqrts" in sys.argv)
+logs    = ("--logs" in sys.argv)
 
 # The higher, the better
 
@@ -49,7 +51,7 @@ data = pd.read_csv(filename)
 
 
 def linreg(expected, features):
-    global data, squares
+    global data, squares, cubes, logs, sqrts
 
     x = [list(data[feat][1:]) for feat in features]
 
@@ -62,6 +64,9 @@ def linreg(expected, features):
     if (sqrts):
         for feat in features:
             x.append([(float(n)**-2) for n in list(data[feat][1:])])
+    if (logs):
+        for feat in features:
+            x.append([math.log(float(n)) for n in list(data[feat][1:])])
 
     x.append([1]*len(x[0]))
 
@@ -90,14 +95,14 @@ percent_correct_c = np.sum(rank_commit_size == rank_commit_size_p) / len(rank_co
 print("\tPercent correct: " + str(percent_correct_c))
 
 print("\nMessage length:")
-features_l = ["gunning_fog_approx", "num_chars", "num_words"]
+features_l = ["gunning_fog_approx", "num_chars", "num_words", "chars_per_word", "num_sentences", "words_per_sentence"]
 expected_l = "rank_message_length"
 rank_message_length, rank_message_length_p, weights_l = linreg(expected_l, features_l)
 percent_correct_l = np.sum(rank_message_length == rank_message_length_p) / len(rank_message_length)
 print("\tPercent correct: " + str(percent_correct_l))
 
 print("\nMessage readability")
-features_r = ["gunning_fog_approx", "num_chars", "num_words"]
+features_r = ["gunning_fog_approx", "num_chars", "num_words", "chars_per_word", "num_sentences", "words_per_sentence"]
 expected_r = "rank_message_readability"
 rank_message_readability, rank_message_readability_p, weights_r = linreg(expected_r, features_r)
 percent_correct_r = np.sum(rank_message_readability == rank_message_readability_p) / len(rank_message_readability)
@@ -112,7 +117,7 @@ csv_output = [rank_commit_size, rank_message_length, rank_message_readability,
 
 csv_output = list(np.array(csv_output).T)
 
-pd.DataFrame(csv_output).to_csv("ranks.csv", index=False, header=False)
+pd.DataFrame(csv_output).to_csv("ranks.csv", index=False, header=False, float_format="%.0f")
 
 while True:
     try:
@@ -124,21 +129,25 @@ while True:
     _gf = gf.gunning_fog(s)
     num_chars = len(s)
     num_words = len(s.split())
-    feats = [_gf, num_chars, num_words]
+    chars_per_word = num_chars / num_words
+    num_sentences = len(s.split('.'))
+    words_per_sentence = num_words / num_sentences
+    feats = [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]
     if (squares):
-        feats.append(_gf**2)
-        feats.append(num_chars**2)
-        feats.append(num_words**2)
+        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
+            feats.append(feat**2)
     if (cubes):
-        feats.append(_gf**3)
-        feats.append(num_chars**3)
-        feats.append(num_words**3)
+        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
+            feats.append(feat**3)
     if (sqrts):
-        feats.append(_gf**-2)
-        feats.append(num_chars**-2)
-        feats.append(num_words**-2)
+        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
+            feats.append(feat**-2)
+    if (logs):
+        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
+            feats.append(math.log(feat))
 
     feats.append(1)
 
     test = np.array(feats)
     print("Readability: " + str(f(weights_r, test)))
+    print("Message length: " + str(f(weights_l, test)))
