@@ -12,10 +12,18 @@ filename = sys.argv[1]
 
 # If squares, append square values of each feature to the list
 # If logs, append logarithmic scale of each feature to feature list
-squares = ("--squares" in sys.argv)
-cubes   = ("--cubes" in sys.argv)
-sqrts   = ("--sqrts" in sys.argv)
-logs    = ("--logs" in sys.argv)
+
+extensions = {
+    "--squares" : (lambda x : x**2),
+    "--invs"    : (lambda x : x**-1),
+    "--cubes"   : (lambda x : x**3),
+    "--sqrts"   : (lambda x : x**-2),
+    "--logs"    : (lambda x : math.log(x))
+}
+
+for ext in list(extensions.keys()):
+    if (not ext in sys.argv):
+        extensions.pop(ext)
 
 # The higher, the better
 
@@ -51,22 +59,12 @@ data = pd.read_csv(filename)
 
 
 def linreg(expected, features):
-    global data, squares, cubes, logs, sqrts
-
+    global extensions
     x = [list(data[feat][1:]) for feat in features]
 
-    if (squares):
+    for ext in extensions:
         for feat in features:
-            x.append([(float(n)**2) for n in list(data[feat][1:])])
-    if (cubes):
-        for feat in features:
-            x.append([(float(n)**3) for n in list(data[feat][1:])])
-    if (sqrts):
-        for feat in features:
-            x.append([(float(n)**-2) for n in list(data[feat][1:])])
-    if (logs):
-        for feat in features:
-            x.append([math.log(float(n)) for n in list(data[feat][1:])])
+            x.append([extensions[ext](float(n)) for n in list(data[feat][1:])])
 
     x.append([1]*len(x[0]))
 
@@ -129,22 +127,22 @@ while True:
     _gf = gf.gunning_fog(s)
     num_chars = len(s)
     num_words = len(s.split())
-    chars_per_word = num_chars / num_words
+    try:
+        chars_per_word = num_chars / num_words
+    except:
+        chars_per_word = num_chars
     num_sentences = len(s.split('.'))
-    words_per_sentence = num_words / num_sentences
+    try:
+        words_per_sentence = num_words / num_sentences
+    except:
+        words_per_sentence = 0
     feats = [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]
-    if (squares):
+    for ext in extensions:
         for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
-            feats.append(feat**2)
-    if (cubes):
-        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
-            feats.append(feat**3)
-    if (sqrts):
-        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
-            feats.append(feat**-2)
-    if (logs):
-        for feat in [_gf, num_chars, num_words, chars_per_word, num_sentences, words_per_sentence]:
-            feats.append(math.log(feat))
+            try:
+                feats.append(extensions[ext](feat))
+            except:
+                feats.append(feat)
 
     feats.append(1)
 
