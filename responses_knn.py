@@ -17,7 +17,7 @@ from sklearn.svm import SVC
 # that prints out numerical warnings.
 # (You probably don't want to do this in any of your projects!)
 
-n_neighbors = 20
+n_neighbors = 11
 
 def warn(*args, **kwargs):
     pass
@@ -62,7 +62,7 @@ print("Accuracy for knn with " + str(n_neighbors) + "\t\t-> " + str(accuracy_sco
 # # # # # # # # # # # # #
 
 # create a mesh to plot in
-h = 0.1  # step size in the mesh
+h = 1  # step size in the mesh
 xaxis = x_test[:, 0]
 yaxis = x_test[:, 1]
 x_min, x_max = xaxis.min()-1, xaxis.max()+1
@@ -94,7 +94,11 @@ plt.title("Linear Kernel SVM")
 plt.axis('tight')
 plt.show()
 
-# while True:
-#     i1, i2 = input().split(',')
-#     guess = svc.predict(int(i1), int(i2))
-#     print(guess)
+while True:
+    try:
+        i1, i2 = input("Input numfiles,numlines: ").split(',')
+        guess = knn.predict(np.array((int(i1), int(i2))).reshape(1, -1))
+        print("\t", guess)
+    except EOFError:
+        print()
+        break
