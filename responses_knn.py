@@ -34,10 +34,8 @@ features = ["num_files", "num_lines"]
 
 # Separate our features from our targets.
 X = np.array(data[features], dtype=int)
-X[:, 0] = X[:, 0].clip(1, 10)
-X[:, 1] = X[:, 1].clip(1, 160)
 
-Y = np.array(data["rank_commit_size"])
+Y = np.array(data["rank_commit_size"], dtype=int)
 
 # X = StandardScaler().fit_transform(X)
 
@@ -65,8 +63,8 @@ print("Accuracy for knn with " + str(n_neighbors) + "\t\t-> " + str(accuracy_sco
 h = 1  # step size in the mesh
 xaxis = x_test[:, 0]
 yaxis = x_test[:, 1]
-x_min, x_max = xaxis.min()-1, xaxis.max()+1
-y_min, y_max = yaxis.min()-1, yaxis.max()+1
+x_min, x_max = 1, 11
+y_min, y_max = 1, 151
 xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                      np.arange(y_min, y_max, h))
 
@@ -88,7 +86,7 @@ plt.axis('tight')
 y_pred = clf.predict(x_test)
 plt.xlim([x_min, x_max])
 plt.ylim([y_min, y_max])
-plt.scatter(x_test[:, 0], x_test[:, 1], c=y_test, edgecolor='black')
+# plt.scatter(x_test[:, 0], x_test[:, 1], c=y_test, edgecolor='black')
 plt.title("Linear Kernel SVM")
 
 plt.axis('tight')
