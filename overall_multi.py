@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import sys
 from sklearn import svm, datasets
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier as KNN
@@ -50,8 +50,8 @@ message_feature_names = ["gunning_fog_approx", "num_chars", "num_words",
 size_features = np.array(data[size_feature_names], dtype=int)
 message_features = np.array(data[message_feature_names], dtype=int)
 
-size_scaler = StandardScaler().fit(size_features)
-message_scaler = StandardScaler().fit(message_features)
+size_scaler = MinMaxScaler().fit(size_features)
+message_scaler = MinMaxScaler().fit(message_features)
 
 scaled_size_features = size_scaler.transform(size_features)
 scaled_message_features = message_scaler.transform(message_features)
